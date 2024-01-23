@@ -7,8 +7,11 @@ import com.Andys4433.Pagamentos.entity.User;
 
 
 
+
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    UserDetails findByEmail(String email);;
+    UserDetails findByEmail(String email);
     
+    User findByVerificationCode(String verificationCode);
 }

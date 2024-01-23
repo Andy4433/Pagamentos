@@ -1,10 +1,15 @@
 package com.Andys4433.Pagamentos.service;
 
+import java.io.UnsupportedEncodingException;
+
+import com.Andys4433.Pagamentos.dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.Andys4433.Pagamentos.entity.User;
 import com.Andys4433.Pagamentos.repository.UserRepository;
 import com.Andys4433.Pagamentos.util.RandomString;
+
+import jakarta.mail.MessagingException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +24,11 @@ public class UserService {
     @Autowired
     private PasswordEncoder PasswordEncoder;
 
-    public User registerUser(User user){
+    @Autowired
+    private MailService mailService;
+
+
+    public UserResponse registerUser(User user) throws UnsupportedEncodingException, MessagingException{
         if (userRepository.findByEmail(user.getEmail())!=null) {
             throw new RuntimeException("Que peninha esse email ja esta na area");
             
@@ -31,7 +40,26 @@ public class UserService {
             user.setVerificationCode(randomCode);
             user.setEnabled(false);
             User savedUser = userRepository.save(user);
-            return savedUser;
+            UserResponse userResponse = new UserResponse(
+                savedUser.getId(), 
+                savedUser.getName(), 
+                savedUser.getEmail(),
+                 savedUser.getPassword()
+            );
+            mailService.sendVerificationEmail(user);
+            return userResponse;
+        }
+    }
+    public boolean verify(String verificationCode){
+        User user = userRepository.findByVerificationCode(verificationCode);
+        if (user == null || user.isEnabled()){
+            return false;
+        }else{
+            user.setVerificationCode(null);
+            user.setEnabled(true);
+            userRepository.save(user);
+
+            return true;
         }
     }
 }
