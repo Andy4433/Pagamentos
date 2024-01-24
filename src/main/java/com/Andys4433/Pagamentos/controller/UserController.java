@@ -2,10 +2,15 @@ package com.Andys4433.Pagamentos.controller;
 
 import java.io.UnsupportedEncodingException;
 
+import com.Andys4433.Pagamentos.dto.AuthenticationRequest;
+import com.Andys4433.Pagamentos.dto.AuthenticationResponse;
 import com.Andys4433.Pagamentos.dto.UserResponse;
+import com.Andys4433.Pagamentos.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +30,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@RequestBody @Valid UserRequest userRequest) throws UnsupportedEncodingException, MessagingException{
         User user = userRequest.toModel();
         UserResponse userSaved = userService.registerUser(user);
@@ -40,4 +51,10 @@ public class UserController {
             return "Verify_fail";
         }
     }
+    @GetMapping("/teste")
+    public String test(){
+        return "logado";
+    }
 }
+
+// localhost:8080/user/register
